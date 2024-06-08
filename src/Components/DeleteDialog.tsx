@@ -12,12 +12,14 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { deleteData } from "../utils/handleApi";
 
 interface DeleteDialogProps {
   type: string;
   pet: Pet;
   onClose: () => void;
   isOpen: boolean;
+  setPets: any
 }
 
 const DeleteDialog: React.FC<DeleteDialogProps> = ({
@@ -25,19 +27,9 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
   pet,
   onClose,
   isOpen,
+  setPets
 }) => {
-  const handleSubmit = async () => {
-    try {
-      await axios.delete(`/${type}/${pet._id}`);
-      onClose();
-      toast.success(
-        `${pet.name} has been deleted successfully.Refresh the page!`
-      );
-    } catch (error: any) {
-      onClose();
-      toast.error(`Error deleting ${pet.name}: ${error.message}`);
-    }
-  };
+
 
   return (
     <Dialog open={true} onClose={onClose} classes={{ paper: "bg-transparent" }}>
@@ -62,7 +54,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
           Cancel
         </button>
         <button
-          onClick={handleSubmit}
+          onClick={()=>deleteData(type,onClose,pet,setPets)}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
         >
           Delete

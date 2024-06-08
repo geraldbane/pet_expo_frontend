@@ -3,11 +3,14 @@ import { Pet } from "../Interfaces/pet.interface";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import DeleteDialog from "./DeleteDialog";
-import axios from "axios";
+
 import FormDialog from "./FormDialog";
+import { fetchData } from "../utils/handleApi";
 
 interface PetTableProps {
   type: string;
+  setPets:any,
+  pets:Pet[]
 }
 
 const typeColors: { [key: string]: string } = {
@@ -16,8 +19,8 @@ const typeColors: { [key: string]: string } = {
   birds: "bg-yellow-500",
 };
 
-const PetTable: React.FC<PetTableProps> = ({ type }) => {
-  const [pets, setPets] = useState<Pet[]>([]);
+const PetTable: React.FC<PetTableProps> = ({ type, setPets,pets }) => {
+  
   const [editingPetId, setEditingPetId] = useState<string | null>(null);
   const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
 
@@ -38,17 +41,7 @@ const PetTable: React.FC<PetTableProps> = ({ type }) => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios(`${type}`);
-        const data = await response.data;
-        setPets(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
+    fetchData(type,setPets);
   }, [type]);
 
   return (
@@ -101,6 +94,7 @@ const PetTable: React.FC<PetTableProps> = ({ type }) => {
                     onClose={handleCloseFormDialog}
                     type={type}
                     pet={pet}
+                    setPets={setPets}
                   />
                 )}
                 <button
@@ -115,6 +109,7 @@ const PetTable: React.FC<PetTableProps> = ({ type }) => {
                     pet={pet}
                     onClose={handleCloseDeleteDialog}
                     isOpen={true}
+                    setPets={setPets}
                   />
                 )}
                 <button className="text-red-500 hover:text-red-700">

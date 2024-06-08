@@ -3,11 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import FormDialog from "./FormDialog";
 
+
 interface PetTypeSelectorProps {
   onSelect: (type: string) => void;
+  setPets: any
 }
 
-const PetTypeSelector: React.FC<PetTypeSelectorProps> = ({ onSelect }) => {
+const PetTypeSelector: React.FC<PetTypeSelectorProps> = ({ onSelect ,setPets }) => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [showFormDialog, setShowFormDialog] = useState(false);
 
@@ -67,8 +69,7 @@ const PetTypeSelector: React.FC<PetTypeSelectorProps> = ({ onSelect }) => {
             <FormDialog
               isOpen={showFormDialog}
               onClose={handleCloseFormDialog}
-              type={selectedType}
-            />
+              type={selectedType} setPets={setPets}            />
           )}
         </>
       )}

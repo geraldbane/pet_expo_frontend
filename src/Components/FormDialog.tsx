@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogContent } from "@mui/material";
-import axios from "axios";
-import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import "tailwindcss/tailwind.css";
 import { Pet } from "../Interfaces/pet.interface";
+import { submitData } from "../utils/handleApi";
 
 interface FormData {
   name: string;
@@ -19,9 +18,16 @@ interface PetDialogProps {
   pet?: Pet;
   onClose: () => void;
   isOpen: boolean;
+  setPets:any
 }
 
-const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
+const FormDialog: React.FC<PetDialogProps> = ({
+  type,
+  pet,
+  onClose,
+  isOpen,
+  setPets,
+}) => {
   const initialFormData: FormData = {
     name: "",
     description: "",
@@ -31,6 +37,7 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: boolean }>({});
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (pet) {
@@ -40,23 +47,27 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
     }
   }, [pet]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
-  
-    // Ensure that e.target is correctly typed as an HTMLInputElement when dealing with the 'file' type
-    const inputElement = e.target as HTMLInputElement;
-  
-    // Get the new value
-    const newValue = type === 'file' ? (inputElement.files ? inputElement.files[0] : null) : value;
-  
-    // Update formData
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: newValue,
-    }));
-  
-    // Check for errors in the form fields
-    if (type !== 'file' && (newValue === undefined || (typeof newValue === 'string' && newValue === ""))) {
+
+    if (type === "file") {
+      const inputElement = e.target as HTMLInputElement;
+      const file = inputElement.files ? inputElement.files[0] : null;
+      setImageFile(file);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: file ? file.name : "",
+      }));
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    }
+
+    if (type !== "file" && (value === undefined || value === "")) {
       setFormErrors((prevErrors) => ({
         ...prevErrors,
         [name]: true,
@@ -68,65 +79,63 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
       }));
     }
   };
-  
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setImageFile(file || null);
-  };
-
-  const handleSubmit = async () => {
-    const errors: { [key: string]: boolean } = {};
-
-    for (const property in formData) {
-      if (Object.prototype.hasOwnProperty.call(formData, property)) {
-        if (property !== "image" && !formData[property as keyof FormData]) {
-          errors[property] = true;
-        }
-      }
-    }
-
-    setFormErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
-      toast.error("Please fill out all fields.");
-      return;
-    }
-
-    try {
-      let imagePath = formData.image;
-
-      if (imageFile) {
-        const imageFormData = new FormData();
-        imageFormData.append("image", imageFile);
-
-        const response = await axios.post(`/${type}/upload`, imageFormData);
-        imagePath = response.data.imagePath;
-      }
-
-      const formDataToSend: FormData = {
-        ...formData,
-        image: imagePath,
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
       };
- console.log(formDataToSend);
-      if (pet) {
-        await axios.put(`/${type}/${pet._id}`, formDataToSend);
-        onClose();
-        toast.success(`Data successfully updated. Refresh the page!`);
-      } else {
-        await axios.post(`/${type}`, formDataToSend);
-        onClose();
-        toast.success(`Data successfully uploaded. Refresh the page!`);
-      }
-    } catch (error) {
-      onClose();
-      toast.error(`Error uploading data: ${error}`);
-      console.error("Error:", error);
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
     }
   };
 
   const resetForm = () => {
     setFormData(initialFormData);
     setFormErrors({});
+    setImagePreview(null);
+    setImageFile(null);
+  };
+
+  useEffect(() => {
+    if (pet && pet.image) {
+      fetch(`/images/${pet.image}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch image");
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch((error) => {
+          console.error("Error fetching image:", error);
+          setImagePreview(null);
+        });
+    } else {
+      setImagePreview(null);
+    }
+  }, [pet]);
+
+  const handleSubmit = async () => {
+    await submitData(
+      formData,
+      setFormErrors,
+      imageFile,
+      pet,
+      type,
+      onClose,
+      setPets
+    );
   };
 
   const properties: { [key: string]: string[] } = {
@@ -166,7 +175,7 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
       className="bg-transparent"
     >
       <DialogTitle className="text-black flex justify-between">
-        <span>{pet ? `Edit ${pet.name}` : `Add New ${type}`}</span>
+        <span>{pet ? `Edit: ${pet.name}` : `Add new ${type}`}</span>
         <button
           onClick={() => {
             onClose();
@@ -181,8 +190,15 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
         <div className="grid grid-cols-2 gap-4 m-3">
           {properties[type].map((property) => (
             <div key={property}>
+              <label
+                className="block mb-1 text-black font-semibold"
+                htmlFor={property}
+              >
+                {property.charAt(0).toUpperCase() + property.slice(1)}:
+              </label>
               {property === "description" ? (
                 <textarea
+                  id={property}
                   name={property}
                   placeholder={`Enter ${property}`}
                   value={formData[property] || ""}
@@ -194,22 +210,43 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
               ) : property === "image" ? (
                 <div>
                   <input
+                    id={property}
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
+                    onChange={(e) => {
+                      handleImageChange(e);
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        const file = files[0];
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setImagePreview(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
                   />
+                  {imagePreview && (
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="mt-2 rounded"
+                      style={{ maxWidth: "100px" }}
+                    />
+                  )}
                 </div>
               ) : (
                 <input
-                type="text"
-                name={property}
-                placeholder={`Enter ${property}`}
-                value={formData[property as keyof FormData] || ""}
-                onChange={handleChange}
-                className={`mb-2 p-2 border rounded outline-none ${
-                  formErrors[property] ? "border-red-500" : ""
-                }`}
-              />
+                  id={property}
+                  type="text"
+                  name={property}
+                  placeholder={`Enter ${property}`}
+                  value={formData[property as keyof FormData] || ""}
+                  onChange={handleChange}
+                  className={`mb-2 p-2 border rounded outline-none ${
+                    formErrors[property] ? "border-red-500" : ""
+                  }`}
+                />
               )}
               {formErrors[property] && (
                 <span className="text-red-500">This field is required</span>
@@ -241,4 +278,4 @@ const CUDialog: React.FC<PetDialogProps> = ({ type, pet, onClose, isOpen }) => {
   );
 };
 
-export default CUDialog;
+export default FormDialog;
