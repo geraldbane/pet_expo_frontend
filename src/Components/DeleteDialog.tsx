@@ -1,6 +1,5 @@
 import React from "react";
 import { Pet } from "../Interfaces/pet.interface";
-import axios from "axios";
 import {
   Dialog,
   DialogActions,
@@ -8,7 +7,6 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -18,18 +16,21 @@ interface DeleteDialogProps {
   type: string;
   pet: Pet;
   onClose: () => void;
-  isOpen: boolean;
-  setPets: any
+
+  setPets: any;
 }
 
 const DeleteDialog: React.FC<DeleteDialogProps> = ({
   type,
   pet,
   onClose,
-  isOpen,
-  setPets
-}) => {
 
+  setPets,
+}) => {
+  const submitDeletion = async () => {
+    console.log(pet._id);
+    await deleteData(type, pet, onClose, setPets);
+  };
 
   return (
     <Dialog open={true} onClose={onClose} classes={{ paper: "bg-transparent" }}>
@@ -42,7 +43,9 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
       <DialogContent>
         <div className="mb-1">
           <h2>Are you sure you want to delete these data?</h2>
-          <h4 className="text-red-500 font-semibold">This action is irreversible!</h4>
+          <h4 className="text-red-500 font-semibold">
+            This action is irreversible!
+          </h4>
         </div>
       </DialogContent>
       <DialogActions>
@@ -54,7 +57,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
           Cancel
         </button>
         <button
-          onClick={()=>deleteData(type,onClose,pet,setPets)}
+          onClick={submitDeletion}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
         >
           Delete

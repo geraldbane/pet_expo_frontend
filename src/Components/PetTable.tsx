@@ -9,8 +9,8 @@ import { fetchData } from "../utils/handleApi";
 
 interface PetTableProps {
   type: string;
-  setPets:any,
-  pets:Pet[]
+  setPets: any;
+  pets: Pet[];
 }
 
 const typeColors: { [key: string]: string } = {
@@ -19,8 +19,7 @@ const typeColors: { [key: string]: string } = {
   birds: "bg-yellow-500",
 };
 
-const PetTable: React.FC<PetTableProps> = ({ type, setPets,pets }) => {
-  
+const PetTable: React.FC<PetTableProps> = ({ type, setPets, pets }) => {
   const [editingPetId, setEditingPetId] = useState<string | null>(null);
   const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
 
@@ -41,7 +40,7 @@ const PetTable: React.FC<PetTableProps> = ({ type, setPets,pets }) => {
   };
 
   useEffect(() => {
-    fetchData(type,setPets);
+    fetchData(type, setPets);
   }, [type]);
 
   return (
@@ -108,7 +107,6 @@ const PetTable: React.FC<PetTableProps> = ({ type, setPets,pets }) => {
                     type={type}
                     pet={pet}
                     onClose={handleCloseDeleteDialog}
-                    isOpen={true}
                     setPets={setPets}
                   />
                 )}
