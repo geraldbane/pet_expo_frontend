@@ -16,8 +16,8 @@ const Footer = () => {
           <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
           <address className="text-sm">
             <p>Rruga: Mine Peza</p>
-            <p>Email: <a href="mailto:geraldbane3@gmail.com">info@pet_expo.com</a> </p>
-            <p>Phone: <a href="tel:+355697631146">123-456-7890</a> </p>
+            <p>Email: <a href="mailto:">info@pet_expo.com</a> </p>
+            <p>Phone: <a href="tel:">123-456-7890</a> </p>
           </address>
           <p>Tiranë, Shqipëri</p>
         </div>
