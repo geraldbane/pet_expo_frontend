@@ -6,15 +6,30 @@ import dog from "../Images/dog_image.jpg";
 import Dropdown from "../Components/Dropdown";
 import ImageCard from "../Components/ImageCard";
 import MainSearchBar from "../Components/MainSearchBar";
+import { fetchPetsByName } from "../utils/admin.utils";
+import { Pet } from "../Interfaces/pet.interface";
+import PetCard from "../Components/PetCard";
 
 interface Props {}
 
 const HomePage: React.FC<Props> = () => {
-  const [selectedOption, setSelectedOption] = useState<string | null>("Cats");
+  const [selectedOption, setSelectedOption] = useState<string>("cats");
   const [searchTerm, setSearchTerm] = useState("");
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [image, setImage] = useState<Map<string, string>>(
+    new Map<string, string>()
+  );
 
   const handleSearch = () => {
-    alert(`Search: ${searchTerm}`);
+    try {
+      fetchPetsByName(selectedOption, searchTerm, setPets, setImage);
+    } catch (error) {
+      console.error("Error searching pets:", error);
+    }
+  };
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchTerm(value);
   };
 
   return (
@@ -23,7 +38,6 @@ const HomePage: React.FC<Props> = () => {
         className="relative bg-cover bg-center h-96"
         style={{ backgroundImage: `url(${petImage})` }}
       >
-      
         <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30"></div>
 
         <div className="text-petOrange text-center pt-20 z-10">
@@ -32,23 +46,29 @@ const HomePage: React.FC<Props> = () => {
             Browse pets from our vast catalogue and give them a new family!
           </h3>
         </div>
-
-        
+   
         <div className="flex justify-center">
           <Dropdown
-            options={["Cats", "Dogs", "Birds"]}
+            options={["cats", "dogs", "birds"]}
             selectedOption={selectedOption}
             onSelect={setSelectedOption}
           />
           <MainSearchBar
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={handleSearchInputChange}
             onSearch={handleSearch}
           />
         </div>
       </div>
 
-     
+      <div className="flex flex-wrap">
+        {pets.map((pet) => (
+          <div className="w-1/4 p-4" key={pet.id}>
+            <PetCard pet={pet} type={selectedOption} />
+          </div>
+        ))}
+      </div>
+
       <h1 className="text-petOrange text-left text-2xl font-semibold mt-10 mx-20">
         Discover our pets
       </h1>

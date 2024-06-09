@@ -5,7 +5,7 @@ import { Cat } from "../Interfaces/cat.interface";
 import { Dog } from "../Interfaces/dog.interface";
 import { Pet } from "../Interfaces/pet.interface";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimesCircle } from "@fortawesome/free-regular-svg-icons";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 interface PetDialogProps {
   type: string;
@@ -14,11 +14,14 @@ interface PetDialogProps {
 }
 
 const PetDialog: React.FC<PetDialogProps> = ({ type, pet, onClose }) => {
+  console.log("petDialog");
+  console.log(type);
   const renderPetDetails = () => {
     switch (type) {
       case "dog":
+      case "dogs":
         const dog = pet as Dog;
-       
+
         return (
           <>
             <p>
@@ -42,6 +45,7 @@ const PetDialog: React.FC<PetDialogProps> = ({ type, pet, onClose }) => {
           </>
         );
       case "cat":
+      case "cats":
         const cat = pet as Cat;
         return (
           <>
@@ -57,6 +61,7 @@ const PetDialog: React.FC<PetDialogProps> = ({ type, pet, onClose }) => {
           </>
         );
       case "bird":
+      case "birds":
         const bird = pet as Bird;
         return (
           <>
@@ -90,7 +95,7 @@ const PetDialog: React.FC<PetDialogProps> = ({ type, pet, onClose }) => {
       <DialogTitle className=" text-black flex justify-between">
         <span>{pet.name}</span>
         <button onClick={onClose} className="text-black">
-          <FontAwesomeIcon icon={faTimesCircle} />
+          <FontAwesomeIcon icon={faTimes} />
         </button>
       </DialogTitle>
       <DialogContent>

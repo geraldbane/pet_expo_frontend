@@ -5,7 +5,8 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import "tailwindcss/tailwind.css";
 import { Pet } from "../Interfaces/pet.interface";
-import { submitData } from "../utils/handleApi";
+import { fetchImage, submitData } from "../utils/admin.utils";
+import { properties } from "../utils/general.utils";
 
 interface FormData {
   name: string;
@@ -18,7 +19,7 @@ interface PetDialogProps {
   pet?: Pet;
   onClose: () => void;
   isOpen: boolean;
-  setPets:any
+  setPets: any;
 }
 
 const FormDialog: React.FC<PetDialogProps> = ({
@@ -100,30 +101,8 @@ const FormDialog: React.FC<PetDialogProps> = ({
     setImagePreview(null);
     setImageFile(null);
   };
-
   useEffect(() => {
-    if (pet && pet.image) {
-      fetch(`/images/${pet.image}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch image");
-          }
-          return response.blob();
-        })
-        .then((blob) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setImagePreview(reader.result as string);
-          };
-          reader.readAsDataURL(blob);
-        })
-        .catch((error) => {
-          console.error("Error fetching image:", error);
-          setImagePreview(null);
-        });
-    } else {
-      setImagePreview(null);
-    }
+    fetchImage(pet?.image, setImagePreview);
   }, [pet]);
 
   const handleSubmit = async () => {
@@ -136,33 +115,6 @@ const FormDialog: React.FC<PetDialogProps> = ({
       onClose,
       setPets
     );
-  };
-
-  const properties: { [key: string]: string[] } = {
-    dogs: [
-      "name",
-      "breed_group",
-      "size",
-      "lifespan",
-      "origin",
-      "temperament",
-      "colors",
-      "description",
-      "image",
-    ],
-    cats: ["name", "origin", "temperament", "colors", "description", "image"],
-    birds: [
-      "name",
-      "species",
-      "family",
-      "habitat",
-      "place_of_found",
-      "diet",
-      "description",
-      "weight_kg",
-      "height_cm",
-      "image",
-    ],
   };
 
   return (

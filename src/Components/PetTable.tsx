@@ -5,19 +5,14 @@ import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import DeleteDialog from "./DeleteDialog";
 
 import FormDialog from "./FormDialog";
-import { fetchData } from "../utils/handleApi";
+import { fetchData } from "../utils/admin.utils";
+import { typeColors } from "../utils/general.utils";
 
 interface PetTableProps {
   type: string;
   setPets: any;
   pets: Pet[];
 }
-
-const typeColors: { [key: string]: string } = {
-  dogs: "bg-blue-500",
-  cats: "bg-green-500",
-  birds: "bg-yellow-500",
-};
 
 const PetTable: React.FC<PetTableProps> = ({ type, setPets, pets }) => {
   const [editingPetId, setEditingPetId] = useState<string | null>(null);

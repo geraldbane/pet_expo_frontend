@@ -5,11 +5,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 
 interface PetCardProps {
+  image?:any
   pet: Pet;
   type: string;
 }
 
-const PetCard: React.FC<PetCardProps> = ({ pet, type }) => {
+const PetCard: React.FC<PetCardProps> = ({ pet, type, image }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleModal = () => {

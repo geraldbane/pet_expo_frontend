@@ -1,10 +1,9 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Cat } from "../Interfaces/cat.interface";
 import PetCard from "../Components/PetCard";
 import SearchBar from "../Components/SearchBar";
-import { toast } from "react-toastify";
 import { ThreeDots } from "react-loader-spinner";
+import { fetchPets, filterPets } from "../utils/externalApi.utils";
 
 const CatsPage = () => {
   const [cats, setCats] = useState<Cat[]>([]);
@@ -12,22 +11,10 @@ const CatsPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
-    const fetchCats = async () => {
-      try {
-        const response = await axios.get("/pets/cats");
-        setCats(response.data);
-        setLoading(false);
-      } catch (error) {
-        toast.error(`Error fetching cats: ${error}`);
-        setLoading(false);
-      }
-    };
-    fetchCats();
+    fetchPets(setCats, setLoading, "cats");
   }, []);
 
-  const filteredCats = cats.filter((cat) =>
-    cat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCats = filterPets(cats, searchQuery);
 
   return (
     <div className="min-w-screen">
@@ -57,7 +44,6 @@ const CatsPage = () => {
           ))}
         </div>
       )}
-      
     </div>
   );
 };

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { ThreeDots } from "react-loader-spinner";
 import { Bird } from "../Interfaces/bird.interface";
 import PetCard from "../Components/PetCard";
 import SearchBar from "../Components/SearchBar";
-import { toast } from "react-toastify";
+import { fetchPets, filterPets } from "../utils/externalApi.utils";
 
 const BirdsPage = () => {
   const [birds, setBirds] = useState<Bird[]>([]);
@@ -12,23 +11,10 @@ const BirdsPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
-    const fetchBirds = async () => {
-      try {
-        const response = await axios.get("/pets/birds");
-        setBirds(response.data);
-        setLoading(false);
-      } catch (error) {
-        toast.error(`Error fetching birds: ${error}`);
-        setLoading(false);
-      }
-    };
-
-    fetchBirds();
+    fetchPets(setBirds, setLoading, "birds");
   }, []);
 
-  const filteredBirds = birds.filter((bird) =>
-    bird.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBirds = filterPets(birds, searchQuery);
 
   return (
     <div className="min-w-screen">

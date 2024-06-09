@@ -10,7 +10,7 @@ import {
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import { deleteData } from "../utils/handleApi";
+import { deleteData } from "../utils/admin.utils";
 
 interface DeleteDialogProps {
   type: string;
